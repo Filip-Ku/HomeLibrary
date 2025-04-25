@@ -5,11 +5,22 @@ using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<HomeLibraryDb>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("HomeLibraryDb")));
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+      app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.RoutePrefix = string.Empty;
+    });
+}
 
 app.MapGet("/library", async (HomeLibraryDb db) =>
 await db.Books.ToListAsync());
