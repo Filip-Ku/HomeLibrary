@@ -1,0 +1,91 @@
+﻿@page "/library"
+
+<PageTitle>Home Library</PageTitle>
+
+@inject HttpClient Http
+
+<h3 class="title">Books in library</h3>
+
+<ul class="book-list">
+    @foreach (var book in booksInLibrary)
+    {
+        <li class="book-item">
+            <img src="@book.ImageUrl" alt="@book.Title" class="book-image" />
+            <div class="book-details">
+                <h3 class="book-title">@book.Title</h3>
+                <p class="book-author"><strong>Author:</strong> @book.Author</p>
+                <p class="book-year"><strong>Year:</strong> @book.Year</p>
+                <p class="book-genre"><strong>Genre:</strong> @book.Genre</p>
+                <p class="book-publisher"><strong>Publisher:</strong> @book.Publisher</p>
+                <p class="book-description">@book.Description</p>
+            </div>
+        </li>
+    }
+</ul>
+
+
+@if (booksInLibrary.Count == 0)
+{
+    <p>No books available.</p>
+}
+
+@if (isLoading)
+{
+    <p>Loading books...</p>
+}
+
+@if (errorMessage != null)
+{
+    <p style="color: red;">Error: @errorMessage</p>
+}
+
+@code {
+    private List<Book> booksInLibrary = new List<Book>();
+    private bool isLoading = false;
+    private string? errorMessage = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await fetch_data_from_backend();
+    }
+
+    private async Task fetch_data_from_backend()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+            var response = await Http.GetAsync("http://localhost:5107/library");
+
+            if (response.IsSuccessStatusCode)
+            {
+                booksInLibrary = await response.Content.ReadFromJsonAsync<List<Book>>() ?? new List<Book>();
+            }
+            else
+            {
+                errorMessage = "Error fetching data.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    public class Book
+{
+    public string Title { get; set; } = string.Empty;
+    public string Author { get; set; } = string.Empty;
+    public int Year { get; set; }
+    public string Publisher { get; set; } = string.Empty;  
+    public string Genre { get; set; } = string.Empty; 
+    public string Description { get; set; } = string.Empty;
+    public string ImageUrl { get; set; } = string.Empty;
+    public bool Wishlist { get; set; } 
+}
+
+}
