@@ -59,3 +59,15 @@
     margin: 4px 0;
     color: #555;
 }
+
+
+.addbutton {
+    background-color: #007acc !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 10px 20px !important;
+    cursor: pointer !important;
+    margin: auto !important;
+    transition: background-color 0.3s ease !important;
+}

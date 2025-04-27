@@ -1,3 +1,64 @@
 @page "/about"
 
 <PageTitle>About</PageTitle>
+
+<div class="about-container">
+    <h1 class="about-title">About Me</h1>
+
+    <p class="about-text">
+        Hello! 👋 My name is <strong>Filip</strong>, and I'm a passionate student currently learning .NET Core.
+    </p>
+
+    <p class="about-text">
+        I'm building this project to practice backend and frontend skills, including web design, API integration, and component-based development.
+    </p>
+</div>
+
+<style>
+.about-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fdfdfd;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.about-title {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #333;
+}
+
+.about-text {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    margin-bottom: 1.2rem;
+    color: #555;
+}
+
+
+.about-link {
+    color: #0078D7;
+    font-weight: bold;
+    text-decoration: none;
+    position: relative;
+}
+
+.about-link::after {
+    content: '';
+    position: absolute;
+    width: 0%;
+    height: 2px;
+    display: block;
+    background: #0078D7;
+    transition: width 0.3s;
+    left: 0;
+    bottom: -2px;
+}
+
+.about-link:hover::after {
+    width: 100%;
+}
+</style>
