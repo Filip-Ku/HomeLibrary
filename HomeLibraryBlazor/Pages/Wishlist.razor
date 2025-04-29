@@ -4,6 +4,65 @@
 
 @inject HttpClient Http
 
+<button @onclick="toggleForm" class="addbutton">
+    @if (!showForm)
+    {
+        <span>Add to Wishlist</span>
+    }
+    else
+    {
+        <span>Close Form</span>
+    }
+</button>
+
+@if (showForm)
+{
+    <div class="form-container">
+        <h3>Add New Book to Wishlist</h3>
+        <EditForm Model="newBook" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group">
+                <label for="Title">Title:</label>
+                <InputText id="Title" class="form-control" @bind-Value="newBook.Title" />
+            </div>
+
+            <div class="form-group">
+                <label for="Author">Author:</label>
+                <InputText id="Author" class="form-control" @bind-Value="newBook.Author" />
+            </div>
+
+            <div class="form-group">
+                <label for="Year">Year:</label>
+                <InputNumber id="Year" class="form-control" @bind-Value="newBook.Year" />
+            </div>
+
+            <div class="form-group">
+                <label for="Publisher">Publisher:</label>
+                <InputText id="Publisher" class="form-control" @bind-Value="newBook.Publisher" />
+            </div>
+
+            <div class="form-group">
+                <label for="Genre">Genre:</label>
+                <InputText id="Genre" class="form-control" @bind-Value="newBook.Genre" />
+            </div>
+
+            <div class="form-group">
+                <label for="Description">Description:</label>
+                <InputTextArea id="Description" class="form-control" @bind-Value="newBook.Description" />
+            </div>
+
+            <div class="form-group">
+                <label for="ImageUrl">Image URL:</label>
+                <InputText id="ImageUrl" class="form-control" @bind-Value="newBook.ImageUrl" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Add Book to Wishlist</button>
+        </EditForm>
+    </div>
+}
+
 <ul class="book-list">
     @foreach (var book in booksInLibrary)
     {
@@ -13,6 +72,7 @@
                 <img src="@book.ImageUrl" alt="@book.Title" class="book-image" />
                 <div class="book-details">
                     <h3 class="book-title">@book.Title</h3>
+                    <button @onclick="() => DeleteBook(book.id)" class="delete-button">Delete</button>
                     <p class="book-author"><strong>Author:</strong> @book.Author</p>
                     <p class="book-year"><strong>Year:</strong> @book.Year</p>
                     <p class="book-genre"><strong>Genre:</strong> @book.Genre</p>
@@ -24,11 +84,9 @@
     }
 </ul>
 
-
-
 @if (booksInLibrary.Count == 0)
 {
-    <p>No books available.</p>
+    <p>No books in your wishlist.</p>
 }
 
 @if (isLoading)
@@ -45,10 +103,34 @@
     private List<Book> booksInLibrary = new List<Book>();
     private bool isLoading = false;
     private string? errorMessage = null;
+    private bool showForm = false;
+
+    private Book newBook = new Book();
 
     protected override async Task OnInitializedAsync()
     {
         await fetch_data_from_backend();
+    }
+
+    private void toggleForm()
+    {
+        showForm = !showForm;
+    }
+
+    private async Task HandleSubmit()
+    {
+        newBook.Wishlist = true; // Ensure the book is marked for the wishlist
+        var response = await Http.PostAsJsonAsync("http://localhost:5107/library", newBook);
+
+        if (response.IsSuccessStatusCode)
+        {
+            await fetch_data_from_backend();
+            showForm = false;
+        }
+        else
+        {
+            errorMessage = "Error adding the book to the wishlist.";
+        }
     }
 
     private async Task fetch_data_from_backend()
@@ -78,16 +160,173 @@
         }
     }
 
+    private async Task DeleteBook(int bookId)
+    {
+        var response = await Http.DeleteAsync($"http://localhost:5107/library/{bookId}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            await fetch_data_from_backend();
+        }
+        else
+        {
+            errorMessage = "Error deleting the book.";
+        }
+    }
+
     public class Book
-{
-    public string Title { get; set; } = string.Empty;
-    public string Author { get; set; } = string.Empty;
-    public int Year { get; set; }
-    public string Publisher { get; set; } = string.Empty;  
-    public string Genre { get; set; } = string.Empty; 
-    public string Description { get; set; } = string.Empty;
-    public string ImageUrl { get; set; } = string.Empty;
-    public bool Wishlist { get; set; } 
+    {
+        public int id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Author { get; set; } = string.Empty;
+        public int Year { get; set; }
+        public string Publisher { get; set; } = string.Empty;
+        public string Genre { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = string.Empty;
+        public bool Wishlist { get; set; } = false;
+    }
 }
 
-}
+<style>
+    .addbutton {
+        background-color: #A67B5B;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 12px 25px;
+        cursor: pointer;
+        margin: 20px auto;
+        display: block;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .addbutton:hover {
+        background-color: #8B5E3C;
+        transform: scale(1.05);
+    }
+
+    .addbutton:focus {
+        outline: none;
+        box-shadow: 0 0 5px rgba(166, 123, 91, 0.7);
+    }
+
+    .form-container {
+        margin-top: 20px;
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #A67B5B;
+    }
+
+    .btn-primary {
+        background-color: #A67B5B;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #8B5E3C;
+    }
+
+    .book-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 20px;
+    }
+
+    .book-item {
+        display: flex;
+        background-color: #fff;
+        margin-bottom: 15px;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .book-image {
+        width: 100px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 5px;
+        margin-right: 20px;
+    }
+
+    .book-details {
+        flex: 1;
+    }
+
+    .book-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .book-author, .book-year, .book-genre, .book-publisher, .book-description {
+        color: #666;
+        margin: 5px 0;
+    }
+
+    .book-description {
+        font-size: 14px;
+        font-style: italic;
+    }
+
+    .delete-button {
+        background-color: #ff4d4d;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        border: 2px black solid;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .delete-button:hover {
+        background-color: #ff3333;
+        transform: scale(1.1);
+    }
+
+    .delete-button:focus {
+        outline: none;
+        box-shadow: 0 0 5px rgba(255, 77, 77, 0.7);
+    }
+</style>
