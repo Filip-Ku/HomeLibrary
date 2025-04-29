@@ -119,7 +119,7 @@
 
     private async Task HandleSubmit()
     {
-        newBook.Wishlist = true; // Ensure the book is marked for the wishlist
+        newBook.Wishlist = true;
         var response = await Http.PostAsJsonAsync("http://localhost:5107/library", newBook);
 
         if (response.IsSuccessStatusCode)
